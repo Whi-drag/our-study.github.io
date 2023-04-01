@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Stick&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alkatra&display=swap" rel="stylesheet">
+    <style>
+        .canvas-space {
+            position: fixed;
+            bottom: 0;
+        }
+
+        #canvas {
+            border: 1px solid #000000;
+            background: rgba(255, 255, 232, 0.5);
+            max-width: 100%;
+            height: auto;
+            max-height: 100%
+        }
+
+        button {
+            font-size: 4vmax;
+        }
+
+        .title {
+            font-family: 'Stick', sans-serif;
+            font-size: 7vw;
+            text-align: center;
+        }
+
+        .Japanese {
+            height: 100vh;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            font-size: 6vw;
+            text-align: center;
+        }
+
+        .English {
+            height: 50vw;
+            font-family: 'Alkatra', cursive;
+            font-size: 10vw;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <p class="title">基礎英語 単語書き取り</p>
+    <div class="canvas-space">
+        <canvas id="canvas" height="300"></canvas>
+        <button type="button" onclick="clearCanvas()">×</button>
+        <button type="button" onclick="prevCanvas()">←</button>
+        <button type="button" onclick="nextCanvas()">→</button>
+    </div>
+    <div id="rnj"></div>
+    <div class="Japanese">（次の段階など）へ進む</div>
+    <div class="English">move on to...</div>
+    <div class="Japanese">まさに…しようとしている</div>
+    <div class="English">(be) about to</div>
+    <div class="Japanese">運命</div>
+    <div class="English">fate</div>
+    <div class="Japanese">…を取り除く</div>
+    <div class="English">take away</div>
+    <div class="Japanese">平均の</div>
+    <div class="English">average</div>
+    <div class="Japanese">結局</div>
+    <div class="English">after all</div>
+    <div class="Japanese">…を打ち負かす</div>
+    <div class="English">beat</div>
+    <div class="Japanese">競争相手、敵</div>
+    <div class="English">opponent</div>
+    <div class="Japanese">…に入る</div>
+    <div class="English">go into...</div>
+    <div class="Japanese">…に逆らって</div>
+    <div class="English">against</div>
+    <div class="Japanese">…を試みる、ねらう</div>
+    <div class="English">(be) going for</div>
+    <div class="Japanese">勝利</div>
+    <div class="English">victory</div>
+    <div class="Japanese">なんてすごい勝利なんだ！</div>
+    <div class="English">What a victory!</div>
+    <div class="Japanese">４位になる</div>
+    <div class="English">come in fourth place</div>
+    <div class="Japanese">…だけれども<br>…にもかかわらず</div>
+    <div class="English">though</div>
+    <div class="Japanese">《口語で》すばらしい、堂々とした</div>
+    <div class="English">Magnificent</div>
+    <div class="Japanese">公開試合、展覧会</div>
+    <div class="English">exhibition</div>
+    <div class="Japanese">びっくりするほどすばらしい<br>信じられない</div>
+    <div class="English">incredible</div>
+    <div class="Japanese">《肯定文で》どんなことも</div>
+    <div class="English">anything</div>
+    <div class="Japanese">…を続ける</div>
+    <div class="English">continue</div>
+    <div class="Japanese">才能</div>
+    <div class="English">talent</div>
+    <div class="Japanese">…を無駄にする</div>
+    <div class="English">waste</div>
+    <div class="Japanese">…を連れ出す、持ち出す</div>
+    <div class="English">take... out</div>
+    <div class="Japanese">歴史的な</div>
+    <div class="English">historical</div>
+    <div class="Japanese">（劇などの）場面設定</div>
+    <div class="English">setting</div>
+    <div class="Japanese">主役の</div>
+    <div class="English">lead</div>
+    <div class="Japanese">感動的な</div>
+    <div class="English">emotional</div>
+    <div class="Japanese">力強い</div>
+    <div class="English">powerful</div>
+    <div class="Japanese">本気の<br>（冗談ではなく）まじめな</div>
+    <div class="English">serious</div>
+
+    <script>
+        var canvas = document.getElementById('canvas'),
+            ctx = canvas.getContext('2d'),
+            moveflg = 0,
+            Xpoint,
+            Ypoint;
+
+        canvas.width = document.documentElement.clientWidth - 20;
+
+        //初期値（サイズ、色、アルファ値）の決定
+        var defSize = 5,
+            defColor = "#555";
+
+        // キャンバスを白色に塗る
+        ctx.fillStyle = 'rgb(255,255,255)';
+
+        // ストレージの初期化
+        var myStorage = localStorage;
+        window.onload = initLocalStorage();
+
+        // PC対応
+        canvas.addEventListener('mousedown', startPoint, false);
+        canvas.addEventListener('mousemove', movePoint, false);
+        canvas.addEventListener('mouseup', endPoint, false);
+        // スマホ対応
+        canvas.addEventListener('touchstart', startPoint, false);
+        canvas.addEventListener('touchmove', movePoint, false);
+        canvas.addEventListener('touchend', endPoint, false);
+
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+
+        function startPoint(e) {
+            e.preventDefault();
+            ctx.beginPath();
+
+            Xpoint = e.layerX;
+            Ypoint = e.layerY - window.scrollY;
+
+            ctx.moveTo(Xpoint, Ypoint);
+        }
+
+        function movePoint(e) {
+            e.preventDefault();
+            if (e.buttons === 1 || e.witch === 1 || e.type == 'touchmove') {
+                Xpoint = e.layerX;
+                Ypoint = e.layerY - window.scrollY;
+                moveflg = 1;
+
+                ctx.lineTo(Xpoint, Ypoint);
+                ctx.lineCap = "round";
+                ctx.lineWidth = defSize * 2;
+                ctx.strokeStyle = defColor;
+                ctx.stroke();
+            }
+        }
+
+        function endPoint(e) {
+            e.preventDefault();
+            if (moveflg === 0) {
+                ctx.lineTo(Xpoint - 1, Ypoint - 1);
+                ctx.lineCap = "round";
+                ctx.lineWidth = defSize * 2;
+                ctx.strokeStyle = defColor;
+                ctx.stroke();
+
+            }
+            moveflg = 0;
+            setLocalStoreage();
+        }
+
+        function clearCanvas() {
+            initLocalStorage();
+            temp = [];
+            resetCanvas();
+        }
+
+        function resetCanvas() {
+            ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+            ctx.fillStyle = 'rgb(255,255,255)';
+        }
+
+        function chgImg() {
+            var png = canvas.toDataURL();
+            document.getElementById("newImg").src = png;
+        }
+
+        function initLocalStorage() {
+            myStorage.setItem("__log", JSON.stringify([]));
+        }
+        function setLocalStoreage() {
+            var png = canvas.toDataURL();
+            var logs = JSON.parse(myStorage.getItem("__log"));
+
+            setTimeout(function () {
+                logs.unshift({ png: png });
+                myStorage.setItem("__log", JSON.stringify(logs));
+                temp = [];
+            }, 0);
+        }
+
+        function prevCanvas() {
+            var logs = JSON.parse(myStorage.getItem("__log"));
+
+            if (logs.length > 0) {
+                temp.unshift(logs.shift());
+
+                setTimeout(function () {
+                    myStorage.setItem("__log", JSON.stringify(logs));
+                    resetCanvas();
+                    draw(logs[0]['png']);
+                }, 0);
+            }
+        }
+
+        function nextCanvas() {
+            var logs = JSON.parse(myStorage.getItem("__log"));
+
+            if (temp.length > 0) {
+                logs.unshift(temp.shift());
+
+                setTimeout(function () {
+                    myStorage.setItem("__log", JSON.stringify(logs));
+                    resetCanvas();
+                    draw(logs[0]['png']);
+                }, 0);
+            }
+        }
+
+        function draw(src) {
+            var img = new Image();
+            img.src = src;
+
+            img.onload = function () {
+                ctx.drawImage(img, 0, 0);
+            }
+        }
+    </script>
+</body>
+
+</html>
